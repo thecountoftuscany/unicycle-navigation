@@ -49,7 +49,7 @@ In general, the information from encoders is not very reliable on its own since 
 - behaviours:
   - Go to goal
     - Velocity is given by `v = e * v_max * (1 - exp(-alpha*||e||^2))/||e||` where `e = goal_pos - self_pos`, i.e., velocity is very close to v_max when the robot is far away from the goal, and decreases as it approaches the goal
-    - Angular velocity is obtained by using a Proportional controller (only the P part in a PID controller) on (desired_heading - current_heading), where the desired_heading is simply towards the obstacle
+    - Angular velocity is obtained by using a Proportional controller (only the P part in a PID controller) on (desired_heading - current_heading), where the desired_heading is simply towards the goal
   - Obstacle avoidance
     - Everything same as go-to-goal (with the goal replaced by the nearest obstacle detected), except that the desired_heading is directly away from the obstacle, i.e., it is a paranoid robot
 - behaviour switching:
