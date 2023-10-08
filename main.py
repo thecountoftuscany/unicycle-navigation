@@ -2,6 +2,7 @@ import numpy as np
 import pygame
 from pygame.locals import *
 from robot import *
+from sensor import *
 import random
 
 # Screen
@@ -9,7 +10,7 @@ screen_width = 640; screen_height = 480
 screen = pygame.display.set_mode([screen_width, screen_height], DOUBLEBUF)
 
 # Obstacles
-num_circ_obsts = 3; obst_min_radius = 10; obst_max_radius = 50  # for circular obstacles
+num_circ_obsts = 8; obst_min_radius = 10; obst_max_radius = 50  # for circular obstacles
 
 def create_circular_obsts(num):
     radius = []; circ_x = []; circ_y = []
@@ -33,10 +34,11 @@ def main():
 
     # Robot
     robot_x = 100; robot_y = 100; robot_phi = 0; robot_l = 15; robot_b = 6  # Initial position
-    skirt_r = 50   # Sensor skirt radius
+    skirt_r = 30   # Sensor skirt radius
+    num_sensors = 8 # Number of distance sensors
     goalX = np.array([600, 400])    # goal position
 
-    data = {"screen":screen, "goalX":goalX, "vmax":0.5, "gtg_scaling":0.0001, "K_p":0.01, "ao_scaling":0.00005}
+    data = {"screen":screen, "goalX":goalX, "vmax":0.5, "gtg_scaling":0.0001, "K_p":0.02, "ao_scaling":0.00005}
 
     # Create obstacles
     [radius, circ_x, circ_y] = create_circular_obsts(num_circ_obsts)
@@ -51,10 +53,11 @@ def main():
 
         # Draw robot, sensor skirt, obstacles and goal
         bot = robot(robot_x, robot_y, robot_phi, robot_l, robot_b, data)
-        pygame.draw.circle(screen, (100, 100, 100), (int(bot.x), int(bot.y)), skirt_r, 0)   # Draw sensor skirt
+        sensors = sensor(num_sensors, skirt_r, bot.x, bot.y, bot.phi, data)
         draw_circular_obsts(radius, circ_x, circ_y)
-        bot.show()    # Draw the robot
         pygame.draw.circle(screen, (0,255,0), goalX, 8, 0)  # Draw goal
+        sensors.show() # Draw the sensors
+        bot.show()    # Draw the robot
 
         # Check if obstacles are in sensor skirt
         close_obst = []; dist = []
@@ -71,7 +74,7 @@ def main():
             closest_obj = dist.index(min(dist)) # gives the index of the closest object
             obstX = np.array([circ_x[closest_obj], circ_y[closest_obj]])
             [v, omega] = bot.avoid_obst(obstX)
-        
+
         # Update robot position and orientation as per control input
         robot_x += v*math.cos(robot_phi); robot_y+= v*math.sin(robot_phi); robot_phi += omega
 
